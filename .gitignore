@@ -6,6 +6,9 @@
 
 *.png
 results.txt
+results.json
+
+output/**
 
 __pycache__
 __pycache__/**
