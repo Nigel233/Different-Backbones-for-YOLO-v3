@@ -6,7 +6,7 @@ Yolo v3 tiny &amp; improvements
 - Go to https://drive.google.com/drive/folders/1ZYwN1OfMjTK4_Bn5LGEbrGP5EDg-jekz?usp=sharing and download `coco_small.zip`.
 - Unzip the file with name `coco_small`, and put the directory **outside** of this project directory
 
-The dataset is a subset of `coco_2017`, and contains 8000 training images, 1000 validation and 100 test images, randomly from the whole COCO dataset with bounding box labels. The procedure of generating these images is in `get_data.ipynb`, but mostly likely you wouldn't not need to run this notebook again.
+The dataset is a subset of `coco_2017`, and contains 8000 training images, 1000 validation and 1000 test images, randomly from the whole COCO dataset with bounding box labels. The procedure of generating these images is in `get_data.ipynb`, but mostly likely you wouldn't not need to run this notebook again.
 
 ## Train YOLO-v3 with `coco_small` dataset
 
