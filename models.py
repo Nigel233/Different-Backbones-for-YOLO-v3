@@ -15,22 +15,29 @@ def create_modules(module_defs, img_size, arc):
     module_list = nn.ModuleList()
     routs = []  # list of layers which rout to deeper layers
     yolo_index = -1
-
+    resnet = torchvision.models.resnet18(pretrained=True)
     for i, mdef in enumerate(module_defs):
         modules = nn.Sequential()
         # if i == 0:
         #     modules.add_module('BatchNorm2d_0', nn.BatchNorm2d(output_filters[-1], momentum=0.1))
         if mdef['type'] == 'resnet1':
-            resnet = torchvision.models.resnet18(pretrained=True)
             resnet1 = list(resnet.children())[:-3] 
             resnet1 = nn.Sequential(*resnet1)
-            resnet2 = list(resnet.children())[-3] 
             modules = resnet1
             filters = mdef['filters']
+            print(mdef['freeze'], type(mdef['freeze']))
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
             
         elif mdef['type'] == 'resnet2':
+            resnet2 = list(resnet.children())[-3] 
             modules = resnet2
             filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+            
         elif mdef['type'] == 'convolutional':
             bn = mdef['batch_normalize']
             filters = mdef['filters']

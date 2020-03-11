@@ -22,5 +22,5 @@ weights/**
 runs/**
 
 *.pyc
-
+data/
 typescript
