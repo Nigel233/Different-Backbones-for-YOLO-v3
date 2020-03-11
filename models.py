@@ -15,13 +15,29 @@ def create_modules(module_defs, img_size, arc):
     module_list = nn.ModuleList()
     routs = []  # list of layers which rout to deeper layers
     yolo_index = -1
-
+    resnet = torchvision.models.resnet18(pretrained=True)
     for i, mdef in enumerate(module_defs):
         modules = nn.Sequential()
         # if i == 0:
         #     modules.add_module('BatchNorm2d_0', nn.BatchNorm2d(output_filters[-1], momentum=0.1))
-
-        if mdef['type'] == 'convolutional':
+        if mdef['type'] == 'resnet1':
+            resnet1 = list(resnet.children())[:-3] 
+            resnet1 = nn.Sequential(*resnet1)
+            modules = resnet1
+            filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+            
+        elif mdef['type'] == 'resnet2':
+            resnet2 = list(resnet.children())[-3] 
+            modules = resnet2
+            filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+            
+        elif mdef['type'] == 'convolutional':
             bn = mdef['batch_normalize']
             filters = mdef['filters']
             size = mdef['size']
@@ -60,8 +76,8 @@ def create_modules(module_defs, img_size, arc):
 
         elif mdef['type'] == 'route':  # nn.Sequential() placeholder for 'route' layer
             layers = mdef['layers']
-            filters = sum([output_filters[i + 1 if i > 0 else i] for i in layers])
-            routs.extend([l if l > 0 else l + i for l in layers])
+            filters = sum([output_filters[i + 1 if i >= 0 else i] for i in layers])
+            routs.extend([l if l >= 0 else l + i for l in layers])
             # if mdef[i+1]['type'] == 'reorg3d':
             #     modules = nn.Upsample(scale_factor=1/float(mdef[i+1]['stride']), mode='nearest')  # reorg3d
 
@@ -114,7 +130,6 @@ def create_modules(module_defs, img_size, arc):
         # Register module list and number of output filters
         module_list.append(modules)
         output_filters.append(filters)
-
     return module_list, routs
 
 
@@ -271,7 +286,7 @@ class Darknet(nn.Module):
 
         for i, (mdef, module) in enumerate(zip(self.module_defs, self.module_list)):
             mtype = mdef['type']
-            if mtype in ['convolutional', 'upsample', 'maxpool']:
+            if mtype in ['convolutional', 'upsample', 'maxpool', 'resnet1','resnet2']:
                 x = module(x)
             elif mtype == 'shortcut':  # sum
                 if verbose:
