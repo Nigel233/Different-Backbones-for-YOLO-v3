@@ -25,7 +25,6 @@ def create_modules(module_defs, img_size, arc):
             resnet1 = nn.Sequential(*resnet1)
             modules = resnet1
             filters = mdef['filters']
-            print(mdef['freeze'], type(mdef['freeze']))
             if mdef['freeze']:
                 for param in modules.parameters():
                     param.requires_grad = False
