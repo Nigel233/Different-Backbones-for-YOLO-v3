@@ -50,4 +50,4 @@ Training would generate a `results.txt` with metrics. The methods `plot_results`
 python -c "from utils import utils; utils.plot_results()"
 ```
 ## Resnet as backbonenet
-`--cfg cfg/resnet.cfg` will replace Darknet with Resnet18 as backbonenet.
+`--cfg "cfg/resnet.cfg"` will replace Darknet with Resnet18 as backbonenet.
