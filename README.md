@@ -9,9 +9,9 @@ Yolo v3 tiny &amp; improvements
 The dataset is a subset of `coco_2017`, and contains 8000 training images, 1000 validation and 1000 test images, randomly from the whole COCO dataset with bounding box labels. The procedure of generating these images is in `get_data.ipynb`, but mostly likely you wouldn't not need to run this notebook again.
 
 ### VOC
-- run get_voc.sh
-- open voc_data.ipynb 
-- change user name in the jupyter notebook and run it.
+- GO to https://drive.google.com/file/d/12D1oHUVl2tHLFx45QPNVAIKyG4MUoQWJ/view?usp=sharing  and download all the files. 
+- Unzip all the files and put images and labels under CSE253Final/data/VOC and three txt files under CSE253Final/data
+
 
 The dataset is VOC 2012, i use the training set of VOC and split the validation set of VOC to our validation and test set, because of no annotations of VOC test set. 
 

@@ -24,3 +24,5 @@ runs/**
 *.pyc
 
 typescript
+
+data/VOC/
