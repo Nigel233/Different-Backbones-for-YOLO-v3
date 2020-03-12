@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from utils.google_utils import *
 from utils.parse_config import *
 from utils.utils import *
+import numpy as np
 
 ONNX_EXPORT = False
 
@@ -16,14 +17,18 @@ def create_modules(module_defs, img_size, arc):
     routs = []  # list of layers which rout to deeper layers
     yolo_index = -1
     resnet = torchvision.models.resnet18(pretrained=True)
+    mobilenet = torchvision.models.mobilenet_v2(pretrained=True)
+
     for i, mdef in enumerate(module_defs):
         modules = nn.Sequential()
         # if i == 0:
         #     modules.add_module('BatchNorm2d_0', nn.BatchNorm2d(output_filters[-1], momentum=0.1))
         if mdef['type'] == 'resnet1':
             resnet1 = list(resnet.children())[:-3] 
+            # print(resnet1)
             resnet1 = nn.Sequential(*resnet1)
             modules = resnet1
+            print(modules)
             filters = mdef['filters']
             if mdef['freeze']:
                 for param in modules.parameters():
@@ -31,7 +36,26 @@ def create_modules(module_defs, img_size, arc):
             
         elif mdef['type'] == 'resnet2':
             resnet2 = list(resnet.children())[-3] 
+            print("2====:", resnet2)
             modules = resnet2
+            filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+
+        elif mdef['type'] == 'mobile1':
+            mobile1 = list(list(mobilenet.children())[0].children())[:-5]
+            mobile1 = nn.Sequential(*mobile1)
+            modules = mobile1
+            filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+            
+        elif mdef['type'] == 'mobile2':
+            mobile2 = list(list(mobilenet.children())[0].children())[-5:-2]
+            mobile2 = nn.Sequential(*mobile2)
+            modules = mobile2
             filters = mdef['filters']
             if mdef['freeze']:
                 for param in modules.parameters():
@@ -286,8 +310,11 @@ class Darknet(nn.Module):
 
         for i, (mdef, module) in enumerate(zip(self.module_defs, self.module_list)):
             mtype = mdef['type']
-            if mtype in ['convolutional', 'upsample', 'maxpool', 'resnet1','resnet2']:
+            if mtype in ['convolutional', 'upsample', 'maxpool', 'resnet1','resnet2', 'mobile1', 'mobile2']:
+                # print(mtype, module)
+                # print("before: ", x.size())
                 x = module(x)
+                # print("after: ", x.size())
             elif mtype == 'shortcut':  # sum
                 if verbose:
                     l = [i - 1] + module.layers  # layers
@@ -303,6 +330,8 @@ class Darknet(nn.Module):
                 if len(layers) == 1:
                     x = out[layers[0]]
                 else:
+                    # for i in range(len(out)):
+                        # print(i, np.shape(out[i]))
                     try:
                         x = torch.cat([out[i] for i in layers], 1)
                     except:  # apply stride 2 for darknet reorg layer
