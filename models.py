@@ -311,10 +311,7 @@ class Darknet(nn.Module):
         for i, (mdef, module) in enumerate(zip(self.module_defs, self.module_list)):
             mtype = mdef['type']
             if mtype in ['convolutional', 'upsample', 'maxpool', 'resnet1','resnet2', 'mobile1', 'mobile2']:
-                # print(mtype, module)
-                # print("before: ", x.size())
                 x = module(x)
-                # print("after: ", x.size())
             elif mtype == 'shortcut':  # sum
                 if verbose:
                     l = [i - 1] + module.layers  # layers
@@ -330,8 +327,6 @@ class Darknet(nn.Module):
                 if len(layers) == 1:
                     x = out[layers[0]]
                 else:
-                    # for i in range(len(out)):
-                        # print(i, np.shape(out[i]))
                     try:
                         x = torch.cat([out[i] for i in layers], 1)
                     except:  # apply stride 2 for darknet reorg layer
