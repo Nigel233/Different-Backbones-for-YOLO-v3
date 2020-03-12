@@ -3,7 +3,6 @@ import torch.nn.functional as F
 from utils.google_utils import *
 from utils.parse_config import *
 from utils.utils import *
-import numpy as np
 
 ONNX_EXPORT = False
 
@@ -25,10 +24,8 @@ def create_modules(module_defs, img_size, arc):
         #     modules.add_module('BatchNorm2d_0', nn.BatchNorm2d(output_filters[-1], momentum=0.1))
         if mdef['type'] == 'resnet1':
             resnet1 = list(resnet.children())[:-3] 
-            # print(resnet1)
             resnet1 = nn.Sequential(*resnet1)
             modules = resnet1
-            print(modules)
             filters = mdef['filters']
             if mdef['freeze']:
                 for param in modules.parameters():
@@ -36,7 +33,6 @@ def create_modules(module_defs, img_size, arc):
             
         elif mdef['type'] == 'resnet2':
             resnet2 = list(resnet.children())[-3] 
-            print("2====:", resnet2)
             modules = resnet2
             filters = mdef['filters']
             if mdef['freeze']:
