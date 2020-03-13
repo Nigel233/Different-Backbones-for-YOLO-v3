@@ -16,6 +16,8 @@ def create_modules(module_defs, img_size, arc):
     routs = []  # list of layers which rout to deeper layers
     yolo_index = -1
     resnet = torchvision.models.resnet18(pretrained=True)
+    mobilenet = torchvision.models.mobilenet_v2(pretrained=True)
+
     for i, mdef in enumerate(module_defs):
         modules = nn.Sequential()
         # if i == 0:
@@ -32,6 +34,24 @@ def create_modules(module_defs, img_size, arc):
         elif mdef['type'] == 'resnet2':
             resnet2 = list(resnet.children())[-3] 
             modules = resnet2
+            filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+
+        elif mdef['type'] == 'mobile1':
+            mobile1 = list(list(mobilenet.children())[0].children())[:-5]
+            mobile1 = nn.Sequential(*mobile1)
+            modules = mobile1
+            filters = mdef['filters']
+            if mdef['freeze']:
+                for param in modules.parameters():
+                    param.requires_grad = False
+            
+        elif mdef['type'] == 'mobile2':
+            mobile2 = list(list(mobilenet.children())[0].children())[-5:-2]
+            mobile2 = nn.Sequential(*mobile2)
+            modules = mobile2
             filters = mdef['filters']
             if mdef['freeze']:
                 for param in modules.parameters():
@@ -286,7 +306,7 @@ class Darknet(nn.Module):
 
         for i, (mdef, module) in enumerate(zip(self.module_defs, self.module_list)):
             mtype = mdef['type']
-            if mtype in ['convolutional', 'upsample', 'maxpool', 'resnet1','resnet2']:
+            if mtype in ['convolutional', 'upsample', 'maxpool', 'resnet1','resnet2', 'mobile1', 'mobile2']:
                 x = module(x)
             elif mtype == 'shortcut':  # sum
                 if verbose:
