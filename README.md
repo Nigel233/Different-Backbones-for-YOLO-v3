@@ -1,5 +1,5 @@
-# CSE253Final
-Yolo v3 tiny &amp; improvements
+# Different Backbones for YOLO-v3
+Yolo v3 tiny &amp; improvements. We developed this project based on https://github.com/ultralytics/yolov3, with significant modifications to use VOC dataset and to change the backbone network to ResNet and MobileNet.
 
 ## Get dataset
 ### COCO
